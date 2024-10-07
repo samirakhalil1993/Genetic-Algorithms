@@ -51,8 +51,7 @@ def genesis(city_list, population_sizes):
 
     return np.array(population_set)  # Returnerar populationen som en NumPy-array för mer effektiv hantering.
 
-population_set = genesis(names_list, population_sizes)  # Genererar den första populationen av lösningar.
-population_set  # Visar populationen.
+
 
 def fitness_eval(city_list, cities_dict):
     # Denna funktion beräknar fitness-värdet (eller kostnaden) för en viss lösning (city_list) genom att summera avstånden mellan alla städer.
@@ -72,18 +71,16 @@ def get_all_fitnes(population_set, cities_dict):
     # Denna funktion beräknar fitness-värdet för varje lösning i hela populationen.
     # population_set är en uppsättning av alla lösningar, och cities_dict är en ordbok med städers namn och koordinater.
 
-    fitnes_list = np.zeros(population_sizes)
+    fitnes_list = np.zeros(n_population)
     # Skapar en NumPy-array fylld med nollor som kommer att lagra fitness-värdet för varje lösning. Arrayen har storleken population_sizes.
 
     # Looping over all solutions computing the fitness for each solution
-    for i in range(population_sizes):  # Loopar genom varje lösning i populationen.
+    for i in range(n_population):  # Loopar genom varje lösning i populationen.
         fitnes_list[i] = fitness_eval(population_set[i], cities_dict)
         # Beräknar fitness-värdet för den i:te lösningen genom att använda fitness_eval-funktionen och lagrar resultatet i fitnes_list.
 
     return fitnes_list  # Returnerar listan med fitness-värden.
 
-fitnes_list = get_all_fitnes(population_set, cities_dict)  # Anropar funktionen för att beräkna fitness för hela populationen.
-fitnes_list  # Visar listan med fitness-värden.
 
 def progenitor_selection(population_set, fitnes_list):
     # Denna funktion väljer progenitorer (föräldrar) för nästa generation genom att använda ett sannolikhetsbaserat urval.
@@ -114,10 +111,6 @@ def progenitor_selection(population_set, fitnes_list):
     return np.array([progenitor_list_a, progenitor_list_b])
     # Returnerar en array där progenitor_list_a och progenitor_list_b representerar föräldraparen.
 
-progenitor_list = progenitor_selection(population_set, fitnes_list)
-# Anropar funktionen för att välja progenitorer baserat på den aktuella populationen och deras fitness-värden.
-
-progenitor_list[0][2]  # Visar den tredje progenitorn i den första progenitor-listan.
 
 def mate_progenitors(prog_a, prog_b):
     # Denna funktion parar två progenitorer (prog_a och prog_b) och genererar en avkomma (offspring).
@@ -157,11 +150,6 @@ def mate_population(progenitor_list):
     return new_population_set
     # Returnerar den nya populationen (listan med alla avkommor).
 
-new_population_set = mate_population(progenitor_list,)
-# Anropar funktionen för att skapa en ny population genom att para progenitorerna.
-
-new_population_set[0]
-# Visar den första avkomman i den nya populationen.
 
 def mutate_offspring(offspring):
     # Denna funktion applicerar mutation på en enskild avkomma genom att byta plats på städer i resvägen.
@@ -194,8 +182,45 @@ def mutate_population(new_population_set):
     return mutated_pop
     # Returnerar den muterade populationen.
 
-mutated_pop = mutate_population(new_population_set)
-# Anropar funktionen för att mutera den nya populationen.
+for n_population in population_sizes:
+    for mutation_rate in mutation_rates:
+        print(f"Running GA with population size: {n_population} and mutation rate: {mutation_rate}")
+        
+        # Initiera en tom variabel för bästa lösningen
+        best_solution = [-1, np.inf, np.array([])]  
+        
+        # Generera initial population
+        population_set = genesis(names_list, n_population)
+        
+        # Initiera populationen
+        mutated_pop = population_set
+        
+        # Kör genetiska algoritmen i 10 000 generationer
+        for i in range(10000):
+            if i % 50 == 0:
+                fitnes_list = get_all_fitnes(mutated_pop, cities_dict)  # Beräkna fitness varje gång det behövs
+                print(f"Generation {i}: Best solution so far: {best_solution[1]}, Average fitness: {fitnes_list.mean()}, Time: {datetime.now().strftime('%d/%m/%y %H:%M')}")
 
-mutated_pop[0]
-# Visar den första muterade avkomman i den nya populationen.
+            
+            # Beräkna fitness för den muterade populationen
+            fitnes_list = get_all_fitnes(mutated_pop, cities_dict)
+            
+            # Kontrollera om vi har hittat en bättre lösning
+            if fitnes_list.min() < best_solution[1]:
+                best_solution[0] = i  # Spara generationen där den bästa lösningen hittades
+                best_solution[1] = fitnes_list.min()  # Spara bästa fitness-värdet
+                best_solution[2] = np.array(mutated_pop)[fitnes_list.min() == fitnes_list]  # Spara bästa lösningen
+            
+            # Välj progenitorer baserat på fitness
+            progenitor_list = progenitor_selection(population_set, fitnes_list)
+            
+            # Generera ny population via parning
+            new_population_set = mate_population(progenitor_list)
+            
+            # Applicera mutation på den nya populationen
+            mutated_pop = mutate_population(new_population_set)
+        
+        # Skriv ut den bästa lösningen som hittades för denna kombination av population och mutation rate
+        print(f"Best solution for population size {n_population}, mutation rate {mutation_rate}: {best_solution[1]} at generation {best_solution[0]}")
+        print(f"Best route: {best_solution[2]}")
+
