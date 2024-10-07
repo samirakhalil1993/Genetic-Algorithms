@@ -36,12 +36,12 @@ cities_dict
 # Returnerar ordboken (cities_dict) så att du kan se eller använda den i senare kod.
 
 # First step: Create the first population set
-def genesis(city_list, n_population):
+def genesis(city_list, population_sizes):
     # Skapar en funktion som genererar den initiala populationen av lösningar.
-    # city_list är en lista över alla städer, och n_population är antalet lösningar som ska genereras.
+    # city_list är en lista över alla städer, och population_sizes är antalet lösningar som ska genereras.
 
     population_set = []  # Skapar en tom lista för att lagra varje genererad lösning.
-    for i in range(n_population):  # Loopar n_population gånger för att generera varje lösning.
+    for i in range(population_sizes):  # Loopar population_sizes gånger för att generera varje lösning.
         # Randomly generating a new solution
         sol_i = city_list[np.random.choice(list(range(n_cities)), n_cities, replace=False)]
         # Genererar en slumpmässig lösning genom att slumpmässigt välja n_cities städer från city_list utan återplacering.
@@ -51,7 +51,7 @@ def genesis(city_list, n_population):
 
     return np.array(population_set)  # Returnerar populationen som en NumPy-array för mer effektiv hantering.
 
-population_set = genesis(names_list, n_population)  # Genererar den första populationen av lösningar.
+population_set = genesis(names_list, population_sizes)  # Genererar den första populationen av lösningar.
 population_set  # Visar populationen.
 
 def fitness_eval(city_list, cities_dict):
@@ -72,11 +72,11 @@ def get_all_fitnes(population_set, cities_dict):
     # Denna funktion beräknar fitness-värdet för varje lösning i hela populationen.
     # population_set är en uppsättning av alla lösningar, och cities_dict är en ordbok med städers namn och koordinater.
 
-    fitnes_list = np.zeros(n_population)
-    # Skapar en NumPy-array fylld med nollor som kommer att lagra fitness-värdet för varje lösning. Arrayen har storleken n_population.
+    fitnes_list = np.zeros(population_sizes)
+    # Skapar en NumPy-array fylld med nollor som kommer att lagra fitness-värdet för varje lösning. Arrayen har storleken population_sizes.
 
     # Looping over all solutions computing the fitness for each solution
-    for i in range(n_population):  # Loopar genom varje lösning i populationen.
+    for i in range(population_sizes):  # Loopar genom varje lösning i populationen.
         fitnes_list[i] = fitness_eval(population_set[i], cities_dict)
         # Beräknar fitness-värdet för den i:te lösningen genom att använda fitness_eval-funktionen och lagrar resultatet i fitnes_list.
 
