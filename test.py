@@ -24,143 +24,180 @@ maze = np.array([
 start_pos = (0, 0)  # Start at the top-left corner (blue)
 goal_pos = (13, 38)   # Goal at the bottom-right corner (red)Z
 
-import numpy as np
-import random
+# Define the directions: up, down, left, right
+directions = ['up', 'down', 'left', 'right']
 
-# Directions: up, down, left, right
-directions = [(0, 1), (0, -1), (-1, 0), (1, 0)]
+population_size=100 
+generations=1000
+mutation_rate=0.1
 
-# Fitness function: reward getting closer to the goal, penalize hitting walls
-def fitness(individual, maze, goal_pos):
-    pos = start_pos
-    penalty = 1000  # Hög straffavgift för att slå i väggar
-    total_cost = 0
-    wall_hits = 0  # Räkna antalet väggträffar
-    
-    for move in individual:
-        new_pos = (pos[0] + move[0], pos[1] + move[1])
-        
-        # Kolla om den nya positionen är utanför labyrinten eller träffar en vägg
-        if new_pos[0] < 0 or new_pos[0] >= maze.shape[0] or new_pos[1] < 0 or new_pos[1] >= maze.shape[1] or maze[new_pos[0], new_pos[1]] == 1000:
-            total_cost += penalty
-            wall_hits += 1
+
+def fitness_function(path):
+    x, y = start_pos
+    penalty = 0  # Penalty for hitting obstacles
+    for move in path:
+        if move == 'up':
+            new_x, new_y = max(0, x - 1), y
+        elif move == 'down':
+            new_x, new_y = min(len(maze) - 1, x + 1), y
+        elif move == 'left':
+            new_x, new_y = x, max(0, y - 1)
+        elif move == 'right':
+            new_x, new_y = x, min(len(maze[0]) - 1, y + 1)
+
+        # Check for walls or obstacles
+        if maze[new_x, new_y] == 1000:  # Check for wall
+            penalty += 100  # Higher penalty for hitting an obstacle
         else:
-            pos = new_pos
-            total_cost += np.linalg.norm(np.array(pos) - np.array(goal_pos))  # Avstånd till mål
-            
-            if pos == goal_pos:
-                return 0  # Om vi når målet, returnera bästa möjliga fitness
+            x, y = new_x, new_y  # Only update position if valid move
+
+    # Manhattan distance to the goal
+    distance_to_goal = abs(goal_pos[0] - x) + abs(goal_pos[1] - y)
+
+    # Fitness is based on distance to goal + penalty for obstacles
+    return distance_to_goal + penalty
+
+# Generate a random path (chromosome)
+def random_path(length):
+    return [random.choice(directions) for _ in range(length)]
+
+# Crossover between two paths (parents)
+def crossover(path1, path2):
+    split_point = random.randint(1, len(path1) - 1)
+    return path1[:split_point] + path2[split_point:]
+
+# Mutate a path by randomly changing a move
+def mutate(path, mutation_rate):
+    if random.random() < mutation_rate:
+        index = random.randint(0, len(path) - 1)
+        new_move = random.choice(directions)
+        
+        # Förhindra att vi sätter en olaglig rörelse (in i en vägg)
+        x, y = start_pos
+        for move in path[:index]:  # Gå genom vägen fram till mutation
+            if move == 'up':
+                x = max(0, x - 1)
+            elif move == 'down':
+                x = min(len(maze) - 1, x + 1)
+            elif move == 'left':
+                y = max(0, y - 1)
+            elif move == 'right':
+                y = min(len(maze[0]) - 1, y + 1)
+        
+        # Om nya draget leder till en vägg, prova igen eller stanna
+        if new_move == 'up':
+            if x - 1 >= 0 and maze[x - 1, y] != 1000:
+                path[index] = new_move
+        elif new_move == 'down':
+            if x + 1 < len(maze) and maze[x + 1, y] != 1000:
+                path[index] = new_move
+        elif new_move == 'left':
+            if y - 1 >= 0 and maze[x, y - 1] != 1000:
+                path[index] = new_move
+        elif new_move == 'right':
+            if y + 1 < len(maze[0]) and maze[x, y + 1] != 1000:
+                path[index] = new_move
+
+    return path
+
+
+def genetic_algorithm():
+    population = [random_path(generations) for _ in range(population_size)]
     
-    # Lägg till extra straff för många väggträffar
-    return total_cost + wall_hits * 500
-
-
-def initialize_population(size, max_moves):
-    population = []
-    for _ in range(size):
-        individual = [random.choice(directions) for _ in range(max_moves)]
-        population.append(individual)
-    return population
-
-# Lägg till en diversifieringsfunktion:
-def diversify_population(population, new_individuals_count, max_moves):
-    for _ in range(new_individuals_count):
-        individual = [random.choice(directions) for _ in range(max_moves)]
-        population.append(individual)
-
-
-# Selection: tournament selection
-def tournament_selection(population, fitnesses, k=3):
-    selected = random.sample(list(zip(population, fitnesses)), k)
-    selected.sort(key=lambda x: x[1])  # Sort by fitness
-    return selected[0][0]  # Return the best individual
-
-# Crossover: single-point crossover
-def crossover(parent1, parent2):
-    point = random.randint(1, len(parent1) - 1)
-    child = parent1[:point] + parent2[point:]
-    return child
-
-# Mutation: random move mutation
-def mutate(individual, mutation_rate=0.1):
-    for i in range(len(individual)):
-        if random.random() < mutation_rate:
-            individual[i] = random.choice(directions)
-    return individual
-
-# Genetic Algorithm
-def genetic_algorithm(maze, start_pos, goal_pos, pop_size=100, max_moves=500, generations=500, mutation_rate=0.2):
-    population = initialize_population(pop_size, max_moves)
-    
-    for generation in range(generations):
+    for gen in range(generations):
         # Evaluate fitness
-        fitnesses = [fitness(individual, maze, goal_pos) for individual in population]
+        fitness_scores = [fitness_function(path) for path in population]
         
-        # Check if a solution is found
-        if 0 in fitnesses:
-            solution = population[fitnesses.index(0)]
-            print(f"Solution found in generation {generation}!")
-            return solution
+        # Check if any path reaches the goal (fitness = 0)
+        if 0 in fitness_scores:
+            best_index = fitness_scores.index(0)
+            return population[best_index], 0
         
-        # Create new population
-        new_population = []
-        for _ in range(pop_size // 2):
-            # Selection
-            parent1 = tournament_selection(population, fitnesses)
-            parent2 = tournament_selection(population, fitnesses)
-            
-            # Crossover
-            child1 = crossover(parent1, parent2)
-            child2 = crossover(parent2, parent1)
-            
-            # Mutation
-            child1 = mutate(child1, mutation_rate)
-            child2 = mutate(child2, mutation_rate)
-            
-            new_population.extend([child1, child2])
+        # Sort the population based on fitness
+        sorted_population = [x for _, x in sorted(zip(fitness_scores, population), key=lambda pair: pair[0])]
+
+        # Filtrera bort de sämsta individerna (de som har gått genom många väggar)
+        sorted_population = [ind for ind in sorted_population if fitness_function(ind) < 10000]  # Ställ in en hög tröskel
         
-        population = new_population
-    
-    print("No solution found.")
-    return None
+        # Om alla individer är dåliga, introducera en ny population
+        if len(sorted_population) < 2:
+            population = [random_path(generations) for _ in range(population_size)]
+            continue
 
-# Run the Genetic Algorithm
-solution = genetic_algorithm(maze, start_pos, goal_pos)
+        # Select top half as parents
+        parents = sorted_population[:len(sorted_population)//2]
+        
+        # Create next generation through crossover and mutation
+        next_population = []
+        while len(next_population) < population_size:
+            parent1, parent2 = random.choice(parents), random.choice(parents)
+            child = crossover(parent1, parent2)
+            child = mutate(child, mutation_rate)
+            next_population.append(child)
+        
+        population = next_population
+    
+    # Return the best solution after all generations
+    fitness_scores = [fitness_function(path) for path in population]
+    best_index = fitness_scores.index(min(fitness_scores))
+    best_path = population[best_index]
+    best_fitness = fitness_scores[best_index]
+    
+    return best_path, best_fitness
 
-# Visualize the maze with the solution
-if solution:
-    pos = start_pos
-    path = [start_pos]
-    for move in solution:
-        new_pos = (pos[0] + move[0], pos[1] + move[1])
-        if new_pos[0] < 0 or new_pos[0] >= maze.shape[0] or new_pos[1] < 0 or new_pos[1] >= maze.shape[1] or maze[new_pos[0], new_pos[1]] == 1000:
-            break
-        pos = new_pos
-        path.append(pos)
-    
-    maze_copy = np.copy(maze)
-    for p in path:
-        maze_copy[p[0], p[1]] = 5  # Mark the path
-    
-    plt.imshow(maze_copy)
-    plt.show()
-def visualize_solution(individual, maze):
-    pos = start_pos
-    path = [start_pos]
-    
-    for move in individual:
-        new_pos = (pos[0] + move[0], pos[1] + move[1])
-        if new_pos[0] < 0 or new_pos[0] >= maze.shape[0] or new_pos[1] < 0 or new_pos[1] >= maze.shape[1] or maze[new_pos[0], new_pos[1]] == 1000:
-            break
-        pos = new_pos
-        path.append(pos)
-    
-    maze_copy = np.copy(maze)
-    for p in path:
-        maze_copy[p[0], p[1]] = 5  # Markera vägen
-    
-    plt.imshow(maze_copy)
-    plt.show()
 
-# Anropa denna funktion för att visualisera de bästa individerna under några generationer
-#visualize_solution(best_individual, maze)
+# Example run
+best_path, fitness = genetic_algorithm()
+print("Best path:", best_path)
+print("Fitness:", fitness)
+
+
+
+# Create a color map:
+cmap = {1000: 'black', 1: 'white', 2: 'blue', 3: 'red', 'path': 'green'}
+
+# Start position and goal
+start_pos = (0, 0)
+goal_pos = (13, 37)
+
+# Initialize the plot
+fig, ax = plt.subplots(figsize=(20, 10))
+
+# Loop through the matrix and plot each cell
+for row in range(maze.shape[0]):
+    for col in range(maze.shape[1]):
+        color = cmap[maze[row, col]]
+        rect = plt.Rectangle((col, maze.shape[0] - row - 1), 1, 1, facecolor=color)
+        ax.add_patch(rect)
+
+# Plot the best path
+x, y = start_pos
+for move in best_path:
+    if move == 'up':
+        x = max(0, x - 1)
+    elif move == 'down':
+        x = min(maze.shape[0] - 1, x + 1)
+    elif move == 'left':
+        y = max(0, y - 1)
+    elif move == 'right':
+        y = min(maze.shape[1] - 1, y + 1)
+    
+    # Color the path as green
+    rect = plt.Rectangle((y, maze.shape[0] - x - 1), 1, 1, facecolor=cmap['path'])
+    ax.add_patch(rect)
+
+# Redraw the start and goal to keep their original colors
+rect = plt.Rectangle((start_pos[1], maze.shape[0] - start_pos[0] - 1), 1, 1, facecolor=cmap[2])  # Blue start
+ax.add_patch(rect)
+rect = plt.Rectangle((goal_pos[1], maze.shape[0] - goal_pos[0] - 1), 1, 1, facecolor=cmap[3])  # Red goal
+ax.add_patch(rect)
+
+# Set grid and limits
+ax.set_xticks(np.arange(0, maze.shape[1], 1))
+ax.set_yticks(np.arange(0, maze.shape[0], 1))
+ax.grid(True)
+ax.set_xlim([0, maze.shape[1]])
+ax.set_ylim([0, maze.shape[0]])
+ax.set_aspect('equal')
+
+plt.show()

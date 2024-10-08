@@ -25,6 +25,10 @@ maze = np.array([
 # 3: Red for end
 cmap = {1000: 'black', 1: 'white', 2: 'blue', 3: 'red'}
 
+# Start position and goal
+start_pos = (0, 0)
+goal_pos = (12, 36)
+
 # Initialize the plot
 fig, ax = plt.subplots(figsize=(20, 10))
 
@@ -34,7 +38,11 @@ for row in range(maze.shape[0]):
         color = cmap[maze[row, col]]
         rect = plt.Rectangle((col, maze.shape[0] - row - 1), 1, 1, facecolor=color)
         ax.add_patch(rect)
-
+# Redraw the start and goal to keep their original colors
+rect = plt.Rectangle((start_pos[1], maze.shape[0] - start_pos[0] - 1), 1, 1, facecolor=cmap[2])  # Blue start
+ax.add_patch(rect)
+rect = plt.Rectangle((goal_pos[1], maze.shape[0] - goal_pos[0] - 1), 1, 1, facecolor=cmap[3])  # Red goal
+ax.add_patch(rect)
 # Set grid and limits
 ax.set_xticks(np.arange(0, maze.shape[1], 1))
 ax.set_yticks(np.arange(0, maze.shape[0], 1))

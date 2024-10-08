@@ -72,7 +72,7 @@ def mutate(path,mutation_rate):
     return path
 
 def genetic_algorithm():
-    population = [random_path(100) for _ in range(population_size)]
+    population = [random_path(generations) for _ in range(population_size)]
     
     for gen in range(generations):
         # Evaluate fitness
@@ -120,7 +120,7 @@ cmap = {1000: 'black', 1: 'white', 2: 'blue', 3: 'red', 'path': 'green'}
 
 # Start position and goal
 start_pos = (0, 0)
-goal_pos = (12, 38)
+goal_pos = (13, 37)
 
 # Initialize the plot
 fig, ax = plt.subplots(figsize=(20, 10))
