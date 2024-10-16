@@ -2,61 +2,57 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
-
 # Maze: 1 = open path, 1000 = wall
 maze = np.array([
-    [2,1,1,1,1,1,1,1,1,1,1,1,1,1000,1,1,1,1,1,1,1,1,1,1000,1,1,1,1,1,1,1,1,1,1000,1,1,1,1,1],  # Row 1
-    [1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1,1,1,1000,1000],  # Row 2
-    [1,1,1,1,1,1,1,1000,1,1,1,1000,1,1,1,1000,1,1,1,1000,1,1000,1,1,1,1,1,1,1,1,1,1,1,1000,1,1000,1,1,1],  # Row 3
-    [1,1,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1],  # Row 4
-    [1,1,1,1,1,1000,1,1,1,1,1,1,1,1000,1,1,1,1000,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1000,1],  # Row 5
-    [1000,1000,1000,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1],  # Row 6
-    [1,1,1,1000,1,1,1,1000,1,1,1,1,1,1,1,1,1,1000,1,1000,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],  # Row 7
-    [1,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1000],  # Row 8
-    [1,1000,1,1,1,1,1,1000,1,1,1,1000,1,1,1,1000,1,1000,1,1000,1,1000,1,1,1,1,1,1,1,1000,1,1,1,1,1,1000,1,1,1],  # Row 9
-    [1,1000,1000,1000,1000,1000,1000,1000,1,1000,1,1000,1,1000,1,1000,1,1000,1,1000,1,1000,1,1000,1,1,1,1,1,1000,1,1000,1000,1000,1,1,1,1000,1],  # Row 10
-    [1,1000,1,1,1,1,1,1000,1,1000,1,1,1,1000,1,1000,1,1,1,1000,1,1000,1,1000,1,1,1,1,1,1000,1,1,1,1000,1,1,1,1000,1],  # Row 11
-    [1,1000,1,1000,1000,1,1,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1],  # Row 12
-    [1,1000,1,1,1000,1,1,1,1,1000,1,1,1,1,1,1,1,1,1,1,1,1000,1,1,1,1,1,1,1,1,1,1,1,1,1,1000,1,3,1],  # Row 13
+    [2,1,1,1,1,1,1,1,1,1,1,1,1,1000,1,1,1,1,1,1,1,1,1,1000,1,1,1,1,1,1,1,1,1,1000,1,1,1,1,1],  
+    [1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1,1,1,1000,1000],  
+    [1,1,1,1,1,1,1,1000,1,1,1,1000,1,1,1,1000,1,1,1,1000,1,1000,1,1,1,1,1,1,1,1,1,1,1,1000,1,1000,1,1,1],  
+    [1,1,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1],  
+    [1,1,1,1,1,1000,1,1,1,1,1,1,1,1000,1,1,1,1000,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1000,1],  
+    [1000,1000,1000,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1000,1],  
+    [1,1,1,1000,1,1,1,1000,1,1,1,1,1,1,1,1,1,1000,1,1000,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],  
+    [1,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1,1000,1,1000,1000,1000,1,1000,1000,1000,1000,1000,1000,1000,1000,1000,1,1000,1000,1000,1000],  
+    [1,1000,1,1,1,1,1,1000,1,1,1,1000,1,1,1,1000,1,1000,1,1000,1,1000,1,1,1,1,1,1,1,1000,1,1,1,1,1,1000,1,1,1],  
+    [1,1000,1000,1000,1000,1000,1000,1000,1,1000,1,1000,1,1000,1,1000,1,1000,1,1000,1,1000,1,1000,1,1,1,1,1,1000,1,1000,1000,1000,1,1,1,1000,1],  
+    [1,1000,1,1,1,1,1,1000,1,1000,1,1,1,1000,1,1000,1,1,1,1000,1,1000,1,1000,1,1,1,1,1,1000,1,1,1,1000,1,1,1,1000,1],  
+    [1,1000,1,1000,1000,1,1,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1000,1000,1,1000,1000,1000,1],  
+    [1,1000,1,1,1000,1,1,1,1,1000,1,1,1,1,1,1,1,1,1,1,1,1000,1,1,1,1,1,1,1,1,1,1,1,1,1,1000,1,3,1],  
 ])
 
 # Start and goal positions
 start_pos = (0, 0)  # Start at the top-left corner (blue)
-goal_pos = (13, 38)   # Goal at the bottom-right corner (red)Z
-
+goal_pos = (12, 38)  # Goal at the bottom-right corner (red)
+length = 200
 # Define the directions: up, down, left, right
 directions = ['up', 'down', 'left', 'right']
 
-population_size=100 
-generations=1000
-mutation_rate=0.1
-
+# Genetic Algorithm Parameters
+population_size = 100
+generations = 10000
+mutation_rate = 0.1
+length=150
 
 def fitness_function(path):
-    x, y = start_pos
-    penalty = 0  # Penalty for hitting obstacles
-    for move in path:
-        if move == 'up':
-            new_x, new_y = max(0, x - 1), y
-        elif move == 'down':
-            new_x, new_y = min(len(maze) - 1, x + 1), y
-        elif move == 'left':
-            new_x, new_y = x, max(0, y - 1)
-        elif move == 'right':
-            new_x, new_y = x, min(len(maze[0]) - 1, y + 1)
+    start_pos = (0, 0)  # Start at the top-left corner (blue)
+    goal_pos = (12, 37)  # Goal at the bottom-right corner (red)
+    time = 0
+    for action in path:
+        time += 1
+        if action == 'up':
+            start_pos = (start_pos[0], start_pos[1]+1)   
+        elif action == 'down':
+            start_pos = (start_pos[0], start_pos[1]-1)   
+        elif action == 'left':
+            start_pos = (start_pos[0]+1, start_pos[1])   
+        elif action == 'right':
+            start_pos = (start_pos[0]-1, start_pos[1])   
+        if start_pos == goal_pos:
+            return 1.0/time
+    return 0.0
 
-        # Check for walls or obstacles
-        if maze[new_x, new_y] == 1000:  # Check for wall
-            penalty += 100  # Higher penalty for hitting an obstacle
-        else:
-            x, y = new_x, new_y  # Only update position if valid move
 
-    # Manhattan distance to the goal
-    distance_to_goal = abs(goal_pos[0] - x) + abs(goal_pos[1] - y)
 
-    # Fitness is based on distance to goal + penalty for obstacles
-    return distance_to_goal + penalty
-
+    
 # Generate a random path (chromosome)
 def random_path(length):
     return [random.choice(directions) for _ in range(length)]
@@ -70,60 +66,24 @@ def crossover(path1, path2):
 def mutate(path, mutation_rate):
     if random.random() < mutation_rate:
         index = random.randint(0, len(path) - 1)
-        new_move = random.choice(directions)
-        
-        # Förhindra att vi sätter en olaglig rörelse (in i en vägg)
-        x, y = start_pos
-        for move in path[:index]:  # Gå genom vägen fram till mutation
-            if move == 'up':
-                x = max(0, x - 1)
-            elif move == 'down':
-                x = min(len(maze) - 1, x + 1)
-            elif move == 'left':
-                y = max(0, y - 1)
-            elif move == 'right':
-                y = min(len(maze[0]) - 1, y + 1)
-        
-        # Om nya draget leder till en vägg, prova igen eller stanna
-        if new_move == 'up':
-            if x - 1 >= 0 and maze[x - 1, y] != 1000:
-                path[index] = new_move
-        elif new_move == 'down':
-            if x + 1 < len(maze) and maze[x + 1, y] != 1000:
-                path[index] = new_move
-        elif new_move == 'left':
-            if y - 1 >= 0 and maze[x, y - 1] != 1000:
-                path[index] = new_move
-        elif new_move == 'right':
-            if y + 1 < len(maze[0]) and maze[x, y + 1] != 1000:
-                path[index] = new_move
-
+        path[index] = random.choice(directions)
     return path
 
-
 def genetic_algorithm():
-    population = [random_path(generations) for _ in range(population_size)]
+    population = [random_path(length) for _ in range(population_size)]
     
     for gen in range(generations):
-        # Evaluate fitness
+        # Evaluate fitness-
         fitness_scores = [fitness_function(path) for path in population]
         
         # Check if any path reaches the goal (fitness = 0)
         if 0 in fitness_scores:
             best_index = fitness_scores.index(0)
             return population[best_index], 0
-        
-        # Sort the population based on fitness
+        print(f"generation: {gen} fitness score: {fitness_scores[0]}")
+        # Select parents based on fitness (lower fitness is better)
         sorted_population = [x for _, x in sorted(zip(fitness_scores, population), key=lambda pair: pair[0])]
-
-        # Filtrera bort de sämsta individerna (de som har gått genom många väggar)
-        sorted_population = [ind for ind in sorted_population if fitness_function(ind) < 10000]  # Ställ in en hög tröskel
         
-        # Om alla individer är dåliga, introducera en ny population
-        if len(sorted_population) < 2:
-            population = [random_path(generations) for _ in range(population_size)]
-            continue
-
         # Select top half as parents
         parents = sorted_population[:len(sorted_population)//2]
         
@@ -151,19 +111,14 @@ best_path, fitness = genetic_algorithm()
 print("Best path:", best_path)
 print("Fitness:", fitness)
 
+# Plotting
 
-
-# Create a color map:
 cmap = {1000: 'black', 1: 'white', 2: 'blue', 3: 'red', 'path': 'green'}
 
-# Start position and goal
-start_pos = (0, 0)
-goal_pos = (13, 37)
-
 # Initialize the plot
-fig, ax = plt.subplots(figsize=(20, 10))
+fig, ax = plt.subplots(figsize=(10, 5))
 
-# Loop through the matrix and plot each cell
+# Plot the maze
 for row in range(maze.shape[0]):
     for col in range(maze.shape[1]):
         color = cmap[maze[row, col]]

@@ -1,6 +1,8 @@
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+from queue import Queue
+
 
 
 # Maze: 1 = open path, 1000 = wall
@@ -22,19 +24,20 @@ maze = np.array([
 
 # Start and goal positions
 start_pos = (0, 0)  # Start at the top-left corner (blue)
-goal_pos = (13, 38)   # Goal at the bottom-right corner (red)Z
+goal_pos = (13, 37)   # Goal at the bottom-right corner (red)Z
 
 # Define the directions: up, down, left, right
 directions = ['up', 'down', 'left', 'right']
 
-population_size=100 
-generations=1000
+population_size=1000
+generations=10000
 mutation_rate=0.1
+length = 200
 
 
 def fitness_function(path):
     x, y = start_pos
-    penalty = 0  # Penalty for hitting obstacles
+    penalty=0
     for move in path:
         if move == 'up':
             x = max(0, x - 1)
@@ -44,17 +47,10 @@ def fitness_function(path):
             y = max(0, y - 1)
         elif move == 'right':
             y = min(len(maze[0]) - 1, y + 1)
+        penalty+= maze[x][y]
+    return penalty 
         
-        # Check for obstacles
-        if maze[x, y] == 1000:
-            penalty += 10  # Incremental penalty for hitting an obstacle
-
-    # Manhattan distance to the goal
-    distance_to_goal = abs(goal_pos[0] - x) + abs(goal_pos[1] - y)
-
-    # Fitness is based on distance to goal + penalty for obstacles
-    return distance_to_goal 
-
+       
 # Generate a random path (chromosome)
 def random_path(length):
     return [random.choice(directions) for _ in range(length)]
@@ -71,24 +67,30 @@ def mutate(path,mutation_rate):
         path[index] = random.choice(directions)
     return path
 
+def selction(fitness_scores,population):
+    # Select parents (tournament selection, roulette wheel, etc.)
+    sorted_population = [x for _, x in sorted(zip(fitness_scores, population), key=lambda pair: pair[0])]
+    # Select top half as parents
+    parents = sorted_population[:len(sorted_population)//2]
+    return parents
+        
+
 def genetic_algorithm():
-    population = [random_path(generations) for _ in range(population_size)]
+    population = [random_path(length) for _ in range(population_size)]
     
     for gen in range(generations):
         # Evaluate fitness
         fitness_scores = [fitness_function(path) for path in population]
+        best=min(fitness_scores)
+        print(f"generation{gen} has best best fitness {best}")
         
         # Check if any path reaches the goal (fitness = 0)
-        if 0 in fitness_scores:
-            best_index = fitness_scores.index(0)
-            return population[best_index], 0
-        
-        # Select parents (tournament selection, roulette wheel, etc.)
-        sorted_population = [x for _, x in sorted(zip(fitness_scores, population), key=lambda pair: pair[0])]
-        
-        # Select top half as parents
-        parents = sorted_population[:len(sorted_population)//2]
-        
+        for i in fitness_scores:
+            if i <= 1000:
+                return population[i], i
+    
+        parents= selction(fitness_scores,population)
+
         # Create next generation through crossover and mutation
         next_population = []
         while len(next_population) < population_size:
@@ -118,10 +120,6 @@ print("Fitness:", fitness)
 # Create a color map:
 cmap = {1000: 'black', 1: 'white', 2: 'blue', 3: 'red', 'path': 'green'}
 
-# Start position and goal
-start_pos = (0, 0)
-goal_pos = (13, 37)
-
 # Initialize the plot
 fig, ax = plt.subplots(figsize=(20, 10))
 
@@ -144,9 +142,9 @@ for move in best_path:
     elif move == 'right':
         y = min(maze.shape[1] - 1, y + 1)
     
-    # Color the path as green
-    rect = plt.Rectangle((y, maze.shape[0] - x - 1), 1, 1, facecolor=cmap['path'])
-    ax.add_patch(rect)
+    # Color the path as a small green circle
+    circle = plt.Circle((y + 0.5, maze.shape[0] - x - 0.5), 0.1, color=cmap['path'], zorder=5)
+    ax.add_patch(circle)
 
 # Redraw the start and goal to keep their original colors
 rect = plt.Rectangle((start_pos[1], maze.shape[0] - start_pos[0] - 1), 1, 1, facecolor=cmap[2])  # Blue start
